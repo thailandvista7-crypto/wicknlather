@@ -299,28 +299,28 @@ export default function CheckoutPage() {
                   }}
                 >
                   <PayPalButtons
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        purchase_units: [
-                          {
-                            amount: {
-                              currency_code: 'USD',
-                              value: totalPrice.toFixed(2),
-                            },
-                          },
-                        ],
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      const details = await actions.order?.capture();
-                      if (details) {
-                        handlePayPalSuccess(details);
-                      }
-                    }}
-                    onError={(err) => {
-                      toast.error('PayPal payment failed');
-                    }}
-                  />
+  createOrder={(_, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: totalPrice.toFixed(2),
+          },
+        },
+      ],
+    } as any); // 👈 THIS is the key
+  }}
+  onApprove={async (_, actions) => {
+    const details = await actions.order?.capture();
+    if (details) {
+      handlePayPalSuccess(details);
+    }
+  }}
+  onError={() => {
+    toast.error('PayPal payment failed');
+  }}
+/>
                 </PayPalScriptProvider>
               )}
             </div>
