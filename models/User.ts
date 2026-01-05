@@ -1,16 +1,20 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+/**
+ * IUser interface
+ * IMPORTANT: extends Document so this is correctly typed in hooks
+ */
 export interface IUser extends Document {
   name: string;
   email: string;
-  password?: string;
+  password: string;
   phone?: string;
   role: 'user' | 'admin';
   isActive: boolean;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
-  provider?: 'local' | 'google' | 'facebook';
+  provider: 'local' | 'google' | 'facebook';
   providerId?: string;
   avatar?: string;
   createdAt: Date;
@@ -18,7 +22,10 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema = new Schema(
+/**
+ * Schema
+ */
+const UserSchema = new Schema<IUser>(
   {
     name: {
       type: String,
@@ -36,6 +43,9 @@ const UserSchema: Schema = new Schema(
       type: String,
       minlength: 6,
       select: false,
+      required: function (this: IUser) {
+        return this.provider === 'local';
+      },
     },
     provider: {
       type: String,
@@ -69,25 +79,34 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-// Hash password before saving (only for local auth)
-UserSchema.pre('save', async function (next) {
+/**
+ * Pre-save hook — hash password
+ * ✅ Correct generic typing (NO casting hacks)
+ */
+UserSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
 
-  const user = this as IUser; // 👈 KEY FIX
-
   const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password as string, salt);
+  this.password = await bcrypt.hash(this.password, salt);
 
   next();
 });
 
-// Compare password method
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return await bcrypt.compare(candidatePassword, this.password);
+/**
+ * Compare password method
+ */
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+/**
+ * Model
+ */
+const User: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;
