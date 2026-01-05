@@ -300,7 +300,8 @@ export default function CheckoutPage() {
                 >
                   <PayPalButtons
   createOrder={(_, actions) => {
-    return (actions.order.create({
+    return actions.order.create({
+      intent: 'CAPTURE',
       purchase_units: [
         {
           amount: {
@@ -309,7 +310,7 @@ export default function CheckoutPage() {
           },
         },
       ],
-    }) as unknown) as any;
+    } as any); // ✅ PayPal TS fix
   }}
   onApprove={async (_, actions) => {
     const details = await actions.order?.capture();
