@@ -75,7 +75,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-semibold text-primary-green mb-2">Customer Care</h3>
                 <p className="text-gray-700 text-sm">
-                  Your satisfaction is our priority. We're here to help.
+                  Your satisfaction is our priority. We&apos;re here to help.
                 </p>
               </div>
             </div>
