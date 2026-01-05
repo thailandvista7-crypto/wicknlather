@@ -70,13 +70,16 @@ const UserSchema: Schema = new Schema(
 );
 
 // Hash password before saving (only for local auth)
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || !this.password) {
-    next();
-    return;
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
   }
+
+  const user = this as IUser; // 👈 KEY FIX
+
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  user.password = await bcrypt.hash(user.password as string, salt);
+
   next();
 });
 
