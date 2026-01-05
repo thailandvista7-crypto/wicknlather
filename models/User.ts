@@ -70,7 +70,7 @@ const UserSchema: Schema = new Schema(
 );
 
 // Hash password before saving (only for local auth)
-userSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
