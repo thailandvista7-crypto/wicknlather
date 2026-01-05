@@ -304,6 +304,7 @@ export default function CheckoutPage() {
                         purchase_units: [
                           {
                             amount: {
+                              currency_code: 'USD',
                               value: totalPrice.toFixed(2),
                             },
                           },
