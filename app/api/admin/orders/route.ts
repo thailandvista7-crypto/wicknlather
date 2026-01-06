@@ -4,9 +4,18 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
-import { requireAdmin } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
-async function getOrders(req: NextRequest, user: any) {
+export async function GET(req: NextRequest) {
+  const user = await getCurrentUser(req);
+
+  if (!user || user.role !== 'admin') {
+    return NextResponse.json(
+      { success: false, message: 'Admin access required' },
+      { status: 401 }
+    );
+  }
+
   try {
     await dbConnect();
 
@@ -43,5 +52,3 @@ async function getOrders(req: NextRequest, user: any) {
     );
   }
 }
-
-export const GET = requireAdmin(getOrders as any);
